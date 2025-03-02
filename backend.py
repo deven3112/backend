@@ -6,9 +6,7 @@ CORS(app)  # Enable CORS for all routes
 
 # Mock health data to send to the frontend
 health_data = {
-    "heart_rate": 72,
-    "temperature": 36.5,
-    "spo2": 98
+   
 }
 
 # Endpoint to send the health data to the frontend
