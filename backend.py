@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Endpoint to handle POST requests with health data
 @app.route('/health-data', methods=['POST'])
@@ -21,15 +23,13 @@ def handle_health_data():
             print(f"Temperature: {temperature} °C")
             print(f"SpO2: {spo2} %")
 
-            # You can add additional processing or storage of the data here
-
-            # Respond back with a success message
-            return jsonify({"message": "Data received successfully"}), 200
+            # Return the received data in the response to be used in React
+            return jsonify({"heart_rate": heart_rate, "temperature": temperature, "spo2": spo2}), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 400
     else:
         return jsonify({"error": "Request must be in JSON format"}), 400
-
+    
 if __name__ == '__main__':
     # Run the Flask app on localhost and port 5000
     app.run(debug=True, host='0.0.0.0', port=5000)
