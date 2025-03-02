@@ -4,24 +4,16 @@ from flask_cors import CORS  # Import CORS to handle cross-origin requests
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Mock health data to send to the frontend
+# This will store the latest health data (You can use a database in a real application)
 health_data = {
-   
+    "heart_rate": None,
+    "temperature": None,
+    "spo2": None
 }
 
-# Endpoint to send the health data to the frontend
-@app.route('/get-health-data', methods=['GET'])
-def get_health_data():
-    try:
-        # Send the health data as JSON
-        return jsonify(health_data), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-# Endpoint to handle POST requests with health data
+# Endpoint to handle POST requests with health data from ESP32
 @app.route('/health-data', methods=['POST'])
 def handle_health_data():
-    # Check if the request contains JSON data
     if request.is_json:
         try:
             # Get the JSON data from the request
@@ -32,12 +24,17 @@ def handle_health_data():
             temperature = data.get("temperature")
             spo2 = data.get("spo2")
 
+            # Update the health data dictionary
+            health_data["heart_rate"] = heart_rate
+            health_data["temperature"] = temperature
+            health_data["spo2"] = spo2
+
             # Print the data to the console (for debugging purposes)
             print(f"Heart Rate: {heart_rate} BPM")
             print(f"Temperature: {temperature} °C")
             print(f"SpO2: {spo2} %")
 
-            # Return the received data in the response (in JSON format)
+            # Respond with the same data back to ESP32
             return jsonify({
                 "heart_rate": heart_rate,
                 "temperature": temperature,
@@ -47,6 +44,15 @@ def handle_health_data():
             return jsonify({"error": str(e)}), 400
     else:
         return jsonify({"error": "Request must be in JSON format"}), 400
+
+# Endpoint to serve the health data to the frontend (React app)
+@app.route('/get-health-data', methods=['GET'])
+def get_health_data():
+    try:
+        # Send the latest health data as JSON
+        return jsonify(health_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
     # Run the Flask app on localhost and port 5000
