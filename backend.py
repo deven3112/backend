@@ -20,6 +20,10 @@ def get_health_data():
 def receive_data():
     data = request.get_json()
     
+    # Check if the required keys are in the received JSON data
+    if 'heartRate' not in data or 'SpO2' not in data or 'temperature' not in data:
+        return jsonify({"error": "Missing required health data"}), 400
+    
     heart_rate = data['heartRate']
     spO2 = data['SpO2']
     temperature = data['temperature']
