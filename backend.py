@@ -1,15 +1,11 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS to handle cross-origin requests
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Mock health data to send to the frontend
-health_data = {
-    "heart_rate": 72,
-    "temperature": 36.5,
-    "spo2": 98
-}
+# Initialize a variable to store the health data
+health_data = {}
 
 # Endpoint to send the health data to the frontend
 @app.route('/get-health-data', methods=['GET'])
@@ -20,35 +16,22 @@ def get_health_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# Endpoint to handle POST requests with health data
 @app.route('/health-data', methods=['POST'])
-def handle_health_data():
-    # Check if the request contains JSON data
-    if request.is_json:
-        try:
-            # Get the JSON data from the request
-            data = request.get_json()
-
-            # Extract the values from the JSON data
-            heart_rate = data.get("heart_rate")
-            temperature = data.get("temperature")
-            spo2 = data.get("spo2")
-
-            # Print the data to the console (for debugging purposes)
-            print(f"Heart Rate: {heart_rate} BPM")
-            print(f"Temperature: {temperature} °C")
-            print(f"SpO2: {spo2} %")
-
-            # Return the received data in the response (in JSON format)
-            return jsonify({
-                "heart_rate": heart_rate,
-                "temperature": temperature,
-                "spo2": spo2
-            }), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
-    else:
-        return jsonify({"error": "Request must be in JSON format"}), 400
+def receive_data():
+    data = request.get_json()
+    
+    heart_rate = data['heartRate']
+    spO2 = data['SpO2']
+    temperature = data['temperature']
+    
+    # Store the received data into the health_data variable
+    health_data['heartRate'] = heart_rate
+    health_data['SpO2'] = spO2
+    health_data['temperature'] = temperature
+    
+    print(f"Received data - Heart Rate: {heart_rate}, SpO2: {spO2}, Temperature: {temperature}")
+    
+    return jsonify({"status": "success"}), 200
 
 if __name__ == '__main__':
     # Run the Flask app on localhost and port 5000
